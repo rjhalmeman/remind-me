@@ -26,7 +26,7 @@ function sair() {
 }
 
 function carregarEventos() {
-    fetch('/api/eventos/menu')
+    fetch('/api/evento/menu')
     .then(function(res) { return res.json(); })
     .then(function(eventos) {
         var div = document.getElementById('listaEventos');
@@ -67,7 +67,7 @@ function carregarEventos() {
 }
 
 function mudarStatus(id, novoStatus) {
-    fetch('/api/eventos/status/' + id, {
+    fetch('/api/evento/status/' + id, {
         method: 'PUT',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ novoStatus: novoStatus })

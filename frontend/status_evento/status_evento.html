@@ -1,26 +1,64 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Status</title>
+    <title>CRUD - Status de Evento</title>
     <link rel="stylesheet" href="../global.css">
+    <link rel="stylesheet" href="./status_evento.css">
 </head>
 <body>
     <div class="container">
-        <h1>Tipos de Status</h1>
-        <a href="../menu/menu.html">Voltar</a>
-        <ul id="lista"></ul>
+        <header>
+            <h1>Status de Evento</h1>
+            <a href="../menu/menu.html">Voltar ao Menu</a>
+        </header>
+        <hr>
+
+        <main>
+            <section class="form-section">
+                <h2>Cadastro de Status</h2>
+                <form id="statusForm">
+                    <div class="search-container">
+                        <label for="searchId">Buscar ID:</label>
+                        <div class="search-input-group">
+                            <input type="number" id="searchId" placeholder="ID">
+                            <button type="button" id="btnBuscar">🔍 Buscar</button>
+                            
+                            <button type="button" id="btnIncluir" class="btn-primary">Incluir</button>
+                            <button type="button" id="btnAlterar" class="btn-secondary" style="display: none;">Alterar</button>
+                            <button type="button" id="btnExcluir" class="btn-danger" style="display: none;">Excluir</button>
+                            <button type="button" id="btnSalvar" class="btn-save" style="display: none;">Salvar</button>
+                            <button type="button" id="btnCancelar" class="btn-cancel" style="display: none;">Cancelar</button>
+                        </div>
+                    </div>
+
+                    <fieldset id="formFields" style="border: none; padding: 0;">
+                        <div class="form-group">
+                            <label for="descricao_status">Descrição do Status:</label>
+                            <input type="text" id="descricao_status" required disabled style="width: 100%; padding: 8px;">
+                        </div>
+                    </fieldset>
+                </form>
+            </section>
+
+            <section class="list-section">
+                <h3>Lista de Status</h3>
+                <div class="table-container">
+                    <table id="statusTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 80px;">ID</th>
+                                <th>Descrição</th>
+                            </tr>
+                        </thead>
+                        <tbody id="statusTableBody"></tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+
+        <div id="messageContainer" class="message-container"></div>
     </div>
-    <script>
-        window.onload = function() {
-            fetch('/api/status').then(function(r){ return r.json() })
-            .then(function(d){
-                var ul = document.getElementById('lista');
-                for(var i=0; i<d.length; i++) {
-                    ul.innerHTML += '<li>ID: ' + d[i].id_status + ' - ' + d[i].descricao_status + '</li>';
-                }
-            });
-        };
-    </script>
+    <script src="./status_evento.js" defer></script>
 </body>
 </html>
