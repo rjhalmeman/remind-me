@@ -1,0 +1,4 @@
+/* Cores específicas dos status para o menu */
+.status-agendado { border-left: 10px solid #ffd700; } /* Amarelo */
+.status-andamento { border-left: 10px solid #32cd32; } /* Verde */
+.status-cancelado { border-left: 10px solid #ff4500; } /* Vermelho */

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Menu Principal</title>
+    <link rel="stylesheet" href="../global.css">
+    <link rel="stylesheet" href="menu.css">
+</head>
+<body>
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2 id="saudacao">Olá!</h2>
+            <button class="btn-danger" onclick="sair()">Sair</button>
+        </div>
+        
+        <hr>
+        <div style="text-align: center;">
+            <a href="../eventos/eventos.html"><button>Gerenciar Eventos</button></a>
+            <a href="../pessoa/pessoa.html"><button>Gerenciar Pessoas</button></a>
+            <a href="../status_evento/status_evento.html"><button>Ver Status</button></a>
+        </div>
+        <hr>
+
+        <h3>Meus Eventos Pendentes</h3>
+        <div id="listaEventos"></div>
+    </div>
+    <script src="menu.js"></script>
+</body>
+</html>

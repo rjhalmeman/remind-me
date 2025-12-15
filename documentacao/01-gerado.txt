@@ -1,0 +1,385 @@
+Com certeza. Abaixo está a implementação completa do projeto remember_yourself, seguindo rigorosamente a estrutura de arquivos, os requisitos de tecnologia (Node.js + Express + PostgreSQL) e o estilo de codificação solicitado (didático, sem arrow functions no frontend).
+
+📦 Arquivos de Configuração
+// package.json { "name": "remember_yourself", "version": "1.0.0", "description": "Sistema de eventos didatico", "main": "backend/server.js", "scripts": { "start": "node backend/server.js" }, "dependencies": { "body-parser": "^1.20.2", "cookie-parser": "^1.4.6", "cors": "^2.8.5", "express": "^4.18.2", "pg": "^8.11.0" } }
+
+// index.html
+
+<!DOCTYPE html>
+
+<html lang="pt-br"> <head> <meta charset="UTF-8"> <title>Remember Yourself - Redirecionando...</title> <script> // Script simples para verificar login e redirecionar window.onload = function() { // Verifica se existe o cookie de usuario (simulação simples) // Em produção, fariamos uma chamada ao backend para validar a sessão var cookieNome = "usuario_logado="; var cookies = document.cookie.split(';'); var logado = false;
+
+        for(var i = 0; i < cookies.length; i++) {
+            var c = cookies[i].trim();
+            if (c.indexOf(cookieNome) == 0) {
+                logado = true;
+                break;
+            }
+        }
+
+        if (logado) {
+            window.location.href = '/menu/menu.html';
+        } else {
+            window.location.href = '/login/login.html';
+        }
+    };
+</script>
+</head> <body> <p>Carregando sistema...</p> </body> </html>
+
+⚙️ Backend (Node.js + Express)
+// backend/database.js const { Pool } = require('pg');
+
+// Configuração da conexão com o PostgreSQL const pool = new Pool({ user: 'radames', host: 'localhost', database: 'remember_yourself', password: 'Lageado001.', port: 5432, });
+
+console.log('--- Conectado ao Banco de Dados PostgreSQL ---');
+
+module.exports = pool;
+
+// backend/controllers/authController.js const db = require('../database');
+
+exports.login = async function(req, res) { const { email, senha } = req.body;
+
+try {
+    const result = await db.query(
+        'SELECT * FROM pessoa WHERE email_pessoa = $1 AND senha_pessoa = $2',
+        [email, senha]
+    );
+
+    if (result.rows.length > 0) {
+        const usuario = result.rows[0];
+        // Cria um cookie simples (para fins didáticos)
+        res.cookie('usuario_logado', usuario.id_pessoa, { maxAge: 900000, httpOnly: false });
+        res.cookie('nome_usuario', usuario.nome_pessoa, { maxAge: 900000, httpOnly: false });
+        res.json({ sucesso: true, usuario: usuario });
+    } else {
+        res.status(401).json({ sucesso: false, mensagem: 'Credenciais inválidas' });
+    }
+} catch (erro) {
+    res.status(500).json({ erro: erro.message });
+}
+};
+
+exports.logout = function(req, res) { res.clearCookie('usuario_logado'); res.clearCookie('nome_usuario'); res.json({ sucesso: true }); };
+
+// backend/controllers/pessoaController.js const db = require('../database');
+
+exports.listar = async function(req, res) { try { const result = await db.query('SELECT * FROM pessoa ORDER BY nome_pessoa'); res.json(result.rows); } catch (err) { res.status(500).json({ erro: err.message }); } };
+
+exports.criar = async function(req, res) { const { email, nome, senha, data_nascimento } = req.body; try { await db.query( 'INSERT INTO pessoa (email_pessoa, nome_pessoa, senha_pessoa, data_nascimento_pessoa) VALUES ($1, $2, $3, $4)', [email, nome, senha, data_nascimento] ); res.json({ sucesso: true }); } catch (err) { res.status(500).json({ erro: err.message }); } };
+
+exports.obter = async function(req, res) { try { const result = await db.query('SELECT * FROM pessoa WHERE id_pessoa = $1', [req.params.id]); res.json(result.rows[0]); } catch (err) { res.status(500).json({ erro: err.message }); } };
+
+exports.atualizar = async function(req, res) { const { email, nome, senha } = req.body; try { await db.query( 'UPDATE pessoa SET email_pessoa=$1, nome_pessoa=$2, senha_pessoa=$3 WHERE id_pessoa=$4', [email, nome, senha, req.params.id] ); res.json({ sucesso: true }); } catch (err) { res.status(500).json({ erro: err.message }); } };
+
+exports.deletar = async function(req, res) { try { await db.query('DELETE FROM pessoa WHERE id_pessoa = $1', [req.params.id]); res.json({ sucesso: true }); } catch (err) { res.status(500).json({ erro: err.message }); } };
+
+// backend/controllers/eventoController.js const db = require('../database');
+
+// Listar eventos para o MENU (Regra: ordenados por data/hora, não concluídos) exports.listarMenu = async function(req, res) { try { // ID 4 é 'Concluído' baseado no INSERT fornecido const query = SELECT e.*, s.descricao_status, d.descricao_evento FROM eventos e JOIN status_evento s ON e.status = s.id_status LEFT JOIN descricao_evento d ON e.id_evento = d.id_evento WHERE e.status != 4 ORDER BY e.data_evento ASC, e.hora_evento ASC; const result = await db.query(query); res.json(result.rows); } catch (err) { res.status(500).json({ erro: err.message }); } };
+
+// CRUD Padrão exports.listar = async function(req, res) { try { const result = await db.query('SELECT * FROM eventos ORDER BY id_evento DESC'); res.json(result.rows); } catch (err) { res.status(500).json({ erro: err.message }); } };
+
+exports.criar = async function(req, res) { const { nome, data, hora, status, id_pessoa, descricao } = req.body; try { // Inserir evento const insertEvento = await db.query( 'INSERT INTO eventos (nome_evento, data_evento, hora_evento, status, id_pessoa) VALUES ($1, $2, $3, $4, $5) RETURNING id_evento', [nome, data, hora, status, id_pessoa] );
+
+    const novoId = insertEvento.rows[0].id_evento;
+
+    // Inserir descrição
+    if (descricao) {
+        await db.query(
+            'INSERT INTO descricao_evento (id_evento, descricao_evento) VALUES ($1, $2)',
+            [novoId, descricao]
+        );
+    }
+
+    res.json({ sucesso: true });
+} catch (err) {
+    res.status(500).json({ erro: err.message });
+}
+};
+
+exports.obter = async function(req, res) { try { const result = await db.query( SELECT e.*, d.descricao_evento FROM eventos e LEFT JOIN descricao_evento d ON e.id_evento = d.id_evento WHERE e.id_evento = $1, [req.params.id] ); res.json(result.rows[0]); } catch (err) { res.status(500).json({ erro: err.message }); } };
+
+exports.atualizarStatus = async function(req, res) { const { novoStatus } = req.body; try { await db.query('UPDATE eventos SET status = $1 WHERE id_evento = $2', [novoStatus, req.params.id]); res.json({ sucesso: true }); } catch (err) { res.status(500).json({ erro: err.message }); } };
+
+exports.deletar = async function(req, res) { try { // Devido ao ON DELETE CASCADE na tabela descricao_evento, basta deletar o evento await db.query('DELETE FROM eventos WHERE id_evento = $1', [req.params.id]); res.json({ sucesso: true }); } catch (err) { res.status(500).json({ erro: err.message }); } };
+
+// backend/controllers/statusController.js const db = require('../database');
+
+exports.listar = async function(req, res) { try { const result = await db.query('SELECT * FROM status_evento ORDER BY id_status'); res.json(result.rows); } catch (err) { res.status(500).json({ erro: err.message }); } };
+
+// backend/routes/authRoutes.js const express = require('express'); const router = express.Router(); const authController = require('../controllers/authController');
+
+router.post('/login', authController.login); router.post('/logout', authController.logout);
+
+module.exports = router;
+
+// backend/routes/pessoaRoutes.js const express = require('express'); const router = express.Router(); const pessoaController = require('../controllers/pessoaController');
+
+router.get('/', pessoaController.listar); router.post('/', pessoaController.criar); router.get('/:id', pessoaController.obter); router.put('/:id', pessoaController.atualizar); router.delete('/:id', pessoaController.deletar);
+
+module.exports = router;
+
+// backend/routes/eventoRoutes.js const express = require('express'); const router = express.Router(); const eventoController = require('../controllers/eventoController');
+
+router.get('/menu', eventoController.listarMenu); // Rota especial para o menu router.put('/status/:id', eventoController.atualizarStatus); // Alterar status rápido
+
+// CRUD Padrão router.get('/', eventoController.listar); router.post('/', eventoController.criar); router.get('/:id', eventoController.obter); router.delete('/:id', eventoController.deletar);
+
+module.exports = router;
+
+// backend/routes/statusRoutes.js const express = require('express'); const router = express.Router(); const statusController = require('../controllers/statusController');
+
+router.get('/', statusController.listar); // Implementar create/update/delete se necessário, aqui focamos na leitura para o select box
+
+module.exports = router;
+
+// backend/server.js const express = require('express'); const bodyParser = require('body-parser'); const cookieParser = require('cookie-parser'); const path = require('path');
+
+const app = express(); const PORT = 3003;
+
+// Middlewares app.use(bodyParser.json()); app.use(bodyParser.urlencoded({ extended: true })); app.use(cookieParser());
+
+// Servir arquivos estáticos do Frontend app.use(express.static(path.join(__dirname, '../frontend'))); // Servir o index.html da raiz também app.use(express.static(path.join(__dirname, '../')));
+
+// Rotas da API const authRoutes = require('./routes/authRoutes'); const pessoaRoutes = require('./routes/pessoaRoutes'); const eventoRoutes = require('./routes/eventoRoutes'); const statusRoutes = require('./routes/statusRoutes');
+
+app.use('/api/auth', authRoutes); app.use('/api/pessoas', pessoaRoutes); app.use('/api/eventos', eventoRoutes); app.use('/api/status', statusRoutes);
+
+// Rota de verificação de login simples para proteção de rotas // (Middleware simplificado) app.use((req, res, next) => { // Exceção para rotas de login e assets if (req.path.includes('/login') || req.path.includes('/api/auth')) { return next(); } // Verifica cookie if (!req.cookies.usuario_logado) { // Se for requisição de API, erro 401 if (req.path.startsWith('/api')) { return res.status(401).json({ erro: 'Não autorizado' }); } } next(); });
+
+app.listen(PORT, () => { console.log(Servidor rodando na porta ${PORT}); });
+
+🧠 Frontend
+Estilos Globais
+// frontend/global.css /* Padronização Visual / body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f8ff; / Azul bem claro (AliceBlue) */ margin: 0; padding: 0; color: #333; }
+
+.container { width: 90%; max-width: 800px; margin: 40px auto; background-color: #ffffff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border: 1px solid #dcdcdc; }
+
+h1, h2 { color: #003366; /* Azul escuro */ text-align: center; }
+
+button { background-color: #0056b3; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-size: 14px; }
+
+button:hover { background-color: #004494; }
+
+input, select, textarea { width: 100%; padding: 10px; margin: 5px 0 15px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+
+/* Utilitários */ .text-center { text-align: center; } .btn-danger { background-color: #d9534f; } .btn-danger:hover { background-color: #c9302c; }
+
+Login
+// frontend/login/login.html
+
+<!DOCTYPE html>
+
+<html lang="pt-br"> <head> <meta charset="UTF-8"> <title>Login - Remember Yourself</title> <link rel="stylesheet" href="../global.css"> <link rel="stylesheet" href="login.css"> </head> <body> <div class="login-container"> <h1>Remember Yourself</h1> <form id="formLogin"> <label>Email:</label> <input type="email" id="email" required placeholder="ex: exemplo@email.com">
+
+        <label>Senha:</label>
+        <input type="password" id="senha" required>
+        
+        <button type="button" onclick="fazerLogin()">Entrar</button>
+    </form>
+    <p id="msgErro" style="color: red; text-align: center;"></p>
+</div>
+<script src="login.js"></script>
+</body> </html>
+
+// frontend/login/login.css .login-container { width: 300px; margin: 100px auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 0 15px rgba(0, 51, 102, 0.2); border-top: 5px solid #003366; }
+
+// frontend/login/login.js function fazerLogin() { var email = document.getElementById('email').value; var senha = document.getElementById('senha').value;
+
+fetch('/api/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: email, senha: senha })
+})
+.then(function(response) {
+    return response.json();
+})
+.then(function(dados) {
+    if (dados.sucesso) {
+        window.location.href = '../menu/menu.html';
+    } else {
+        document.getElementById('msgErro').innerText = dados.mensagem || "Erro ao logar";
+    }
+})
+.catch(function(erro) {
+    console.error(erro);
+});
+}
+
+Menu Principal
+// frontend/menu/menu.html
+
+<!DOCTYPE html>
+
+<html lang="pt-br"> <head> <meta charset="UTF-8"> <title>Menu Principal</title> <link rel="stylesheet" href="../global.css"> <link rel="stylesheet" href="menu.css"> </head> <body> <div class="navbar"> <span>Olá, <b id="nomeUsuario">Carregando...</b></span> <button onclick="fazerLogout()" class="btn-danger">Sair</button> </div>
+
+<div class="container">
+    <h2>Próximos Eventos</h2>
+    
+    <div class="botoes-crud">
+        <a href="../eventos/eventos.html"><button>Gerenciar Eventos</button></a>
+        <a href="../pessoa/pessoa.html"><button>Gerenciar Pessoas</button></a>
+        <a href="../status_evento/status_evento.html"><button>Gerenciar Status</button></a>
+    </div>
+    <hr>
+
+    <div id="listaEventos">
+        </div>
+</div>
+
+<script src="menu.js"></script>
+</body> </html>
+
+// frontend/menu/menu.css .navbar { background-color: #003366; color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+
+.card-evento { border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; background-color: white; }
+
+/* Cores por status / .status-1 { border-left: 8px solid #ffcc00; } / Agendado: Amarelo / .status-2 { border-left: 8px solid #28a745; } / Em andamento: Verde / .status-3 { border-left: 8px solid #dc3545; } / Cancelado: Vermelho */
+
+.botoes-crud { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
+
+// frontend/menu/menu.js window.onload = function() { carregarUsuario(); carregarEventosMenu(); };
+
+function carregarUsuario() { // Ler cookie 'nome_usuario' de forma simples var match = document.cookie.match(new RegExp('(^| )nome_usuario=([^;]+)')); if (match) { // Decodificar URI caso tenha espaços/acentos document.getElementById('nomeUsuario').innerText = decodeURIComponent(match[2]).replace(/%20/g, ' '); } else { window.location.href = '../login/login.html'; } }
+
+function fazerLogout() { fetch('/api/auth/logout', { method: 'POST' }) .then(function() { window.location.href = '../login/login.html'; }); }
+
+function carregarEventosMenu() { fetch('/api/eventos/menu') .then(function(res) { return res.json(); }) .then(function(eventos) { var html = ''; if (eventos.length === 0) { html = '<p class="text-center">Nenhum evento pendente.</p>'; } else { for (var i = 0; i < eventos.length; i++) { var e = eventos[i]; // Formatar data var dataFormatada = new Date(e.data_evento).toLocaleDateString('pt-BR');
+
+            // Definir classe de cor baseada no ID do status
+            var classeStatus = 'status-' + e.status;
+
+            html += '<div class="card-evento ' + classeStatus + '">';
+            html += '<div>';
+            html += '<h3>' + e.nome_evento + '</h3>';
+            html += '<p>Data: ' + dataFormatada + ' às ' + e.hora_evento + '</p>';
+            html += '<p><i>' + (e.descricao_evento || 'Sem descrição') + '</i></p>';
+            html += '<b>Status: ' + e.descricao_status + '</b>';
+            html += '</div>';
+            
+            // Botões de ação rápida (Mudar status)
+            html += '<div>';
+            if (e.status == 1) { // Se Agendado -> Botão Iniciar
+                html += '<button onclick="mudarStatus('+e.id_evento+', 2)">Iniciar</button> ';
+                html += '<button class="btn-danger" onclick="mudarStatus('+e.id_evento+', 3)">Cancelar</button>';
+            } else if (e.status == 2) { // Se Em andamento -> Botão Concluir
+                html += '<button onclick="mudarStatus('+e.id_evento+', 4)">Concluir</button>';
+            }
+            html += '</div>';
+            html += '</div>';
+        }
+    }
+    document.getElementById('listaEventos').innerHTML = html;
+});
+}
+
+function mudarStatus(idEvento, novoStatus) { fetch('/api/eventos/status/' + idEvento, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ novoStatus: novoStatus }) }) .then(function() { carregarEventosMenu(); }); }
+
+CRUD Eventos (Exemplo completo)
+// frontend/eventos/eventos.html
+
+<!DOCTYPE html>
+
+<html lang="pt-br"> <head> <meta charset="UTF-8"> <title>Gerenciar Eventos</title> <link rel="stylesheet" href="../global.css"> </head> <body> <div class="container"> <h1>Cadastro de Eventos</h1> <a href="../menu/menu.html">Voltar ao Menu</a> <hr>
+
+    <form id="formEvento">
+        <input type="hidden" id="id_evento">
+        <label>Nome do Evento:</label>
+        <input type="text" id="nome_evento" required>
+
+        <label>Data:</label>
+        <input type="date" id="data_evento" required>
+
+        <label>Hora:</label>
+        <input type="time" id="hora_evento" required>
+
+        <label>Descrição:</label>
+        <textarea id="descricao_evento"></textarea>
+
+        <label>Status:</label>
+        <select id="status_evento" required></select>
+
+        <label>Responsável (ID Pessoa):</label>
+        <input type="number" id="id_pessoa" placeholder="ID do usuário responsável" required>
+
+        <button type="button" onclick="salvarEvento()">Salvar</button>
+        <button type="button" class="btn-danger" onclick="limparForm()">Cancelar</button>
+    </form>
+
+    <hr>
+    <h3>Lista de Eventos</h3>
+    <table width="100%" border="1" style="border-collapse: collapse;">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Data</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody id="tabelaEventos"></tbody>
+    </table>
+</div>
+<script src="eventos.js"></script>
+</body> </html>
+
+// frontend/eventos/eventos.js window.onload = function() { carregarSelectStatus(); listarEventos(); };
+
+function carregarSelectStatus() { fetch('/api/status') .then(function(res) { return res.json(); }) .then(function(lista) { var select = document.getElementById('status_evento'); select.innerHTML = ''; for (var i = 0; i < lista.length; i++) { var opt = document.createElement('option'); opt.value = lista[i].id_status; opt.innerText = lista[i].descricao_status; select.appendChild(opt); } }); }
+
+function listarEventos() { fetch('/api/eventos') .then(function(res) { return res.json(); }) .then(function(lista) { var tbody = document.getElementById('tabelaEventos'); tbody.innerHTML = ''; for(var i=0; i < lista.length; i++) { var e = lista[i]; var tr = '<tr>' + '<td>' + e.id_evento + '</td>' + '<td>' + e.nome_evento + '</td>' + '<td>' + new Date(e.data_evento).toLocaleDateString() + '</td>' + '<td>' + '<button onclick="deletarEvento('+e.id_evento+')" class="btn-danger">Excluir</button>' + '</td>' + '</tr>'; tbody.innerHTML += tr; } }); }
+
+function salvarEvento() { var nome = document.getElementById('nome_evento').value; var data = document.getElementById('data_evento').value; var hora = document.getElementById('hora_evento').value; var desc = document.getElementById('descricao_evento').value; var status = document.getElementById('status_evento').value; var pessoa = document.getElementById('id_pessoa').value;
+
+var dados = {
+    nome: nome, data: data, hora: hora, descricao: desc, status: status, id_pessoa: pessoa
+};
+
+fetch('/api/eventos', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(dados)
+})
+.then(function() {
+    alert('Salvo com sucesso!');
+    limparForm();
+    listarEventos();
+})
+.catch(function(err) { alert('Erro ao salvar'); });
+}
+
+function deletarEvento(id) { if(confirm('Tem certeza?')) { fetch('/api/eventos/' + id, { method: 'DELETE' }) .then(function() { listarEventos(); }); } }
+
+function limparForm() { document.getElementById('formEvento').reset(); }
+
+CRUD Pessoa (Simples)
+// frontend/pessoa/pessoa.html
+
+<!DOCTYPE html>
+
+<html lang="pt-br"> <head> <meta charset="UTF-8"> <title>Gerenciar Pessoas</title> <link rel="stylesheet" href="../global.css"> </head> <body> <div class="container"> <h1>Pessoas</h1> <a href="../menu/menu.html">Voltar</a> <form id="formPessoa"> <label>Nome:</label> <input type="text" id="nome_pessoa"> <label>Email:</label> <input type="email" id="email_pessoa"> <label>Senha:</label> <input type="password" id="senha_pessoa"> <label>Nascimento:</label> <input type="date" id="nasc_pessoa"> <button type="button" onclick="salvarPessoa()">Cadastrar</button> </form> <hr> <ul id="listaPessoas"></ul> </div> <script src="pessoa.js"></script> </body> </html>
+
+// frontend/pessoa/pessoa.js window.onload = function() { listarPessoas(); };
+
+function listarPessoas() { fetch('/api/pessoas') .then(function(res) { return res.json(); }) .then(function(lista) { var ul = document.getElementById('listaPessoas'); ul.innerHTML = ''; for(var i=0; i<lista.length; i++){ ul.innerHTML += '<li>' + lista[i].nome_pessoa + ' (' + lista[i].email_pessoa + ')</li>'; } }); }
+
+function salvarPessoa() { var dados = { nome: document.getElementById('nome_pessoa').value, email: document.getElementById('email_pessoa').value, senha: document.getElementById('senha_pessoa').value, data_nascimento: document.getElementById('nasc_pessoa').value };
+
+fetch('/api/pessoas', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(dados)
+}).then(function() {
+    listarPessoas();
+    document.getElementById('formPessoa').reset();
+});
+}
+
+CRUD Status (Simples)
+// frontend/status_evento/status_evento.html
+
+<!DOCTYPE html>
+
+<html lang="pt-br"> <head> <meta charset="UTF-8"> <title>Status Evento</title> <link rel="stylesheet" href="../global.css"> </head> <body> <div class="container"> <h1>Status de Eventos</h1> <a href="../menu/menu.html">Voltar</a> <p>Visualização apenas.</p> <ul id="listaStatus"></ul> </div> <script src="status_evento.js"></script> </body> </html>
+
+// frontend/status_evento/status_evento.js window.onload = function() { fetch('/api/status') .then(function(r) { return r.json(); }) .then(function(lista) { var ul = document.getElementById('listaStatus'); for(var i=0; i<lista.length; i++) { ul.innerHTML += '<li>' + lista[i].id_status + ' - ' + lista[i].descricao_status + '</li>'; } }); };

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Remember Yourself</title>
+    <script>
+        // Redirecionamento simples baseado no cookie
+        window.onload = function() {
+            if (document.cookie.indexOf("usuario_logado") >= 0) {
+                window.location.href = '/frontend/menu/menu.html';
+            } else {
+                window.location.href = '/frontend/login/login.html';
+            }
+        };
+    </script>
+</head>
+<body>
+    <h2 style="text-align: center; color: #003366;">Carregando sistema...</h2>
+</body>
+</html>
