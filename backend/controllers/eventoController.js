@@ -1,23 +1,33 @@
 const db = require('../database');
 
 // Lista para o Menu (Ordenado, não concluídos)
+// Lista para o Menu (Apenas do usuário logado e não concluídos)
 exports.listarMenu = async function(req, res) {
     try {
-        // Status 4 = Concluído. Trazemos tudo que é diferente de 4.
+        // Recebemos o ID via query string (ex: ?id_pessoa=1)
+        const { id_pessoa } = req.query;
+
+        if (!id_pessoa) {
+            return res.status(400).json({ erro: 'ID do usuário não fornecido.' });
+        }
+
+        // Adicionamos "AND e.id_pessoa = $1" ao SQL
         const sql = `
-            SELECT e.*, s.descricao_status, d.descricao_evento
+            SELECT e.*, s.descricao_status
             FROM eventos e
             JOIN status_evento s ON e.status = s.id_status
-            LEFT JOIN descricao_evento d ON e.id_evento = d.id_evento
-            WHERE e.status != 4
+            WHERE e.status != 4 AND e.id_pessoa = $1
             ORDER BY e.data_evento ASC, e.hora_evento ASC
         `;
-        const result = await db.query(sql);
+        
+        const result = await db.query(sql, [id_pessoa]);
         res.json(result.rows);
     } catch (err) {
         res.status(500).json({ erro: err.message });
     }
 };
+
+
 exports.atualizarStatus = async function(req, res) {
     const { novoStatus } = req.body;
     const { id } = req.params;
