@@ -1,13 +1,13 @@
-Com certeza. Abaixo está a implementação completa do projeto remember_yourself, seguindo rigorosamente a estrutura de arquivos, os requisitos de tecnologia (Node.js + Express + PostgreSQL) e o estilo de codificação solicitado (didático, sem arrow functions no frontend).
+Com certeza. Abaixo está a implementação completa do projeto remind_me, seguindo rigorosamente a estrutura de arquivos, os requisitos de tecnologia (Node.js + Express + PostgreSQL) e o estilo de codificação solicitado (didático, sem arrow functions no frontend).
 
 📦 Arquivos de Configuração
-// package.json { "name": "remember_yourself", "version": "1.0.0", "description": "Sistema de eventos didatico", "main": "backend/server.js", "scripts": { "start": "node backend/server.js" }, "dependencies": { "body-parser": "^1.20.2", "cookie-parser": "^1.4.6", "cors": "^2.8.5", "express": "^4.18.2", "pg": "^8.11.0" } }
+// package.json { "name": "remind_me", "version": "1.0.0", "description": "Sistema de eventos didatico", "main": "backend/server.js", "scripts": { "start": "node backend/server.js" }, "dependencies": { "body-parser": "^1.20.2", "cookie-parser": "^1.4.6", "cors": "^2.8.5", "express": "^4.18.2", "pg": "^8.11.0" } }
 
 // index.html
 
 <!DOCTYPE html>
 
-<html lang="pt-br"> <head> <meta charset="UTF-8"> <title>Remember Yourself - Redirecionando...</title> <script> // Script simples para verificar login e redirecionar window.onload = function() { // Verifica se existe o cookie de usuario (simulação simples) // Em produção, fariamos uma chamada ao backend para validar a sessão var cookieNome = "usuario_logado="; var cookies = document.cookie.split(';'); var logado = false;
+<html lang="pt-br"> <head> <meta charset="UTF-8"> <title>Remind Me - Redirecionando...</title> <script> // Script simples para verificar login e redirecionar window.onload = function() { // Verifica se existe o cookie de usuario (simulação simples) // Em produção, fariamos uma chamada ao backend para validar a sessão var cookieNome = "usuario_logado="; var cookies = document.cookie.split(';'); var logado = false;
 
         for(var i = 0; i < cookies.length; i++) {
             var c = cookies[i].trim();
@@ -29,7 +29,7 @@ Com certeza. Abaixo está a implementação completa do projeto remember_yoursel
 ⚙️ Backend (Node.js + Express)
 // backend/database.js const { Pool } = require('pg');
 
-// Configuração da conexão com o PostgreSQL const pool = new Pool({ user: 'radames', host: 'localhost', database: 'remember_yourself', password: 'Lageado001.', port: 5432, });
+// Configuração da conexão com o PostgreSQL const pool = new Pool({ user: 'radames', host: 'localhost', database: 'remind_me', password: 'Lageado001.', port: 5432, });
 
 console.log('--- Conectado ao Banco de Dados PostgreSQL ---');
 
@@ -170,7 +170,7 @@ Login
 
 <!DOCTYPE html>
 
-<html lang="pt-br"> <head> <meta charset="UTF-8"> <title>Login - Remember Yourself</title> <link rel="stylesheet" href="../global.css"> <link rel="stylesheet" href="login.css"> </head> <body> <div class="login-container"> <h1>Remember Yourself</h1> <form id="formLogin"> <label>Email:</label> <input type="email" id="email" required placeholder="ex: exemplo@email.com">
+<html lang="pt-br"> <head> <meta charset="UTF-8"> <title>Login - Remind me</title> <link rel="stylesheet" href="../global.css"> <link rel="stylesheet" href="login.css"> </head> <body> <div class="login-container"> <h1>Remember Yourself</h1> <form id="formLogin"> <label>Email:</label> <input type="email" id="email" required placeholder="ex: exemplo@email.com">
 
         <label>Senha:</label>
         <input type="password" id="senha" required>

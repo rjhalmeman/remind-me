@@ -1,5 +1,5 @@
 {
-  "name": "remember_yourself",
+  "name": "remind_me",
   "version": "1.0.0",
   "description": "Programa para gerenciar eventos que não podem ser esquecidos.",
   "keywords": [
@@ -9,7 +9,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "remember_yourself"
+    "url": "remind_me"
   },
   "license": "ISC",
   "author": "Radames J. Halmeman",
