@@ -2,20 +2,27 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Login</title>
+    <title>Login - Remember Yourself</title>
     <link rel="stylesheet" href="../global.css">
+    <style>
+        body { display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .login-container { width: 300px; padding: 20px; border: 1px solid #ccc; border-radius: 8px; background: white; text-align: center; }
+        input { width: 100%; margin: 10px 0; padding: 10px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background: #007bff; color: white; border: none; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .msg { margin-top: 10px; font-weight: bold; }
+    </style>
 </head>
 <body>
-    <div class="container" style="max-width: 400px; margin-top: 100px;">
-        <h1>Login</h1>
-        <label>Email:</label>
-        <input type="email" id="email" placeholder="usuario@email.com" value="berola@email.com">
-        
-        <label>Senha:</label>
-        <input type="password" id="senha" value="senha123">
-        
-        <button onclick="entrar()" style="width: 100%;">Entrar</button>
+    <div class="login-container">
+        <h2>Login</h2>
+        <form id="loginForm">
+            <input type="email" id="email" placeholder="Seu email (ex: admin@teste.com)" required>
+            <input type="password" id="senha" placeholder="Sua senha" required>
+            <button type="submit">Entrar</button>
+        </form>
+        <div id="mensagem" class="msg"></div>
     </div>
-    <script src="login.js"></script>
+    <script src="./login.js"></script>
 </body>
 </html>

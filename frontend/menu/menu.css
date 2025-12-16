@@ -1,4 +1,101 @@
-/* Cores específicas dos status para o menu */
-.status-agendado { border-left: 10px solid #ffd700; } /* Amarelo */
-.status-andamento { border-left: 10px solid #32cd32; } /* Verde */
-.status-cancelado { border-left: 10px solid #ff4500; } /* Vermelho */
+body {
+    background-color: #f4f4f9;
+}
+
+.container {
+    max-width: 900px; /* Um pouco mais largo para caber a linha */
+}
+
+/* Estilo dos Botões do Menu Superior */
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button {
+    margin: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+}
+
+/* --- ESTILO DA LISTA DE EVENTOS --- */
+
+.event-card {
+    display: flex; /* Coloca tudo na mesma linha */
+    align-items: center;
+    justify-content: space-between;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-left: 8px solid #ccc; /* Cor padrão */
+    transition: transform 0.2s;
+}
+
+.event-card:hover {
+    transform: translateY(-2px);
+}
+
+.event-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex: 1; /* Ocupa o espaço sobrando */
+}
+
+.event-header {
+    font-weight: bold;
+    font-size: 1.1em;
+    color: #333;
+}
+
+.event-details {
+    font-size: 0.9em;
+    color: #666;
+    display: flex;
+    gap: 15px;
+}
+
+.event-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: 15px;
+}
+
+/* Select de status dentro do card */
+.status-select {
+    padding: 5px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+.btn-update {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 0.8em;
+}
+
+/* Cores por Status (Assumindo IDs 1, 2, 3...) */
+/* Status 1: Agendado/Pendente (Amarelo/Laranja) */
+.status-border-1 { border-left-color: #ffc107; }
+.status-bg-1 { background-color: #fffbf0; }
+
+/* Status 2: Em andamento (Azul) */
+.status-border-2 { border-left-color: #17a2b8; }
+.status-bg-2 { background-color: #f0fbff; }
+
+/* Status 3: Realizado/Aguardando (Verde Claro) */
+.status-border-3 { border-left-color: #28a745; }
+
+/* Status 4: Cancelado/Arquivado (Cinza/Vermelho) */
+.status-border-4 { border-left-color: #6c757d; }

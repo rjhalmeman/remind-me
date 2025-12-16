@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>CRUD - Eventos</title>
+    <link rel="stylesheet" href="../global.css">
+    <link rel="stylesheet" href="./evento.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Gerenciamento de Eventos</h1>
+            <a href="../menu/menu.html">Voltar ao Menu</a>
+        </header>
+        <hr>
+
+        <main>
+            <section class="form-section">
+                <h2>Dados do Evento</h2>
+                <form id="eventoForm">
+                    <div class="search-container">
+                        <label for="searchId">ID do Evento:</label>
+                        <div class="search-input-group">
+                            <input type="number" id="searchId" placeholder="ID">
+                            <button type="button" id="btnBuscar">🔍 Buscar</button>
+                            <button type="button" id="btnIncluir" class="btn-primary">Incluir</button>
+                            <button type="button" id="btnAlterar" class="btn-secondary" style="display: none;">Alterar</button>
+                            <button type="button" id="btnExcluir" class="btn-danger" style="display: none;">Excluir</button>
+                            <button type="button" id="btnSalvar" class="btn-save" style="display: none;">Salvar</button>
+                            <button type="button" id="btnCancelar" class="btn-cancel" style="display: none;">Cancelar</button>
+                        </div>
+                    </div>
+
+                    <fieldset id="formFields" style="border: none; padding: 0;">
+                        <div class="form-group">
+                            <label>Nome do Evento:</label>
+                            <input type="text" id="nome_evento" required disabled>
+                        </div>
+                        <div class="form-group">
+                            <label>Data:</label>
+                            <input type="date" id="data_evento" required disabled>
+                        </div>
+                        <div class="form-group">
+                            <label>Hora:</label>
+                            <input type="time" id="hora_evento" required disabled>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Pessoa Responsável:</label>
+                            <select id="id_pessoa" required disabled>
+                                <option value="">Carregando...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Status do Evento:</label>
+                            <select id="status" required disabled>
+                                <option value="">Carregando...</option>
+                            </select>
+                        </div>
+
+                        <div class="audio-panel">
+                            <label>Áudio do Evento</label>
+                            <audio id="audioPreview" controls></audio>
+                            <input type="file" id="inputAudio" accept="audio/*" disabled>
+                            <button type="button" onclick="limparAudio()" id="btnLimparAudio" class="btn-danger" style="width:auto; font-size:10px;" disabled>Remover Áudio</button>
+                        </div>
+                    </fieldset>
+                </form>
+            </section>
+
+            <section class="list-section">
+                <h3>Eventos Cadastrados</h3>
+                <div class="table-container">
+                    <table id="eventosTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px;">ID</th>
+                                <th>Data</th>
+                                <th>Nome</th>
+                                <th>Pessoa</th>
+                                <th>Status</th>
+                                <th>Som</th>
+                            </tr>
+                        </thead>
+                        <tbody id="eventosTableBody"></tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+        <div id="messageContainer" class="message-container"></div>
+    </div>
+    <script src="./evento.js" defer></script>
+</body>
+</html>
